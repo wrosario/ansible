@@ -1,0 +1,41 @@
+# test code to assert postgresql_privs
+# (c) 2014,  Wayne Rosario <wrosario@ansible.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ============================================================
+# Assert database access privileges
+#
+# ============================================================
+# ============================================================
+- name: run command to query for postgresql user 
+  command: psql -c "\du"
+  register: result
+
+- name: assert postgresql user is present 
+  assert: { that: "'{{ user_name }}' in result.stdout" }
+
+- name: run psql command to show privileges for user (expect privileges in stdout)
+  command: psql -c "\z" -d {{ database_name }}
+  register: result
+  when: privs is defined
+
+- name: assert output match the correct access privileges
+  assert:
+    that:
+       - "result.changed == true"
+       - "'{{ privileges }}' in result.stdout" 
+
