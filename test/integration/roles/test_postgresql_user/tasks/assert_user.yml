@@ -19,23 +19,27 @@
 # ============================================================
 # Assert database access privileges
 #
-# ============================================================
-# ============================================================
 - name: run command to query for postgresql user 
   command: psql -c "\du"
   register: result
+  sudo: yes
+  sudo_user: postgres
 
 - name: assert postgresql user is present 
   assert: { that: "'{{ user_name }}' in result.stdout" }
 
 - name: run psql command to show privileges for user (expect privileges in stdout)
-  command: psql -c "\z" -d {{ database_name }}
+  command: psql -c "\z" 
+  sudo: yes
+  sudo_user: postgres
   register: result
-  when: privs is defined
+  when: priv is defined
+
 
 - name: assert output match the correct access privileges
   assert:
     that:
        - "result.changed == true"
        - "'{{ privileges }}' in result.stdout" 
+  when: priv is defined
 

@@ -19,20 +19,11 @@
 # ============================================================
 # Assert database access privileges
 #
-- name: assert database privileges changed 
-  assert:
-    that:
-       - "output.changed == {{changed}}"
-
-- name: run psql command to show database access privileges
-  command: psql -c "\z" -d {{ database_name }}
+- name: run command to query for postgresql user 
+  command: psql -c "\du"
+  register: result
   sudo: yes
   sudo_user: postgres
-  register: result
 
-- name: assert output match the correct access privileges
-  assert:
-    that:
-       - "result.changed == true"
-       - "'{{ privileges }}' in result.stdout" 
-
+- name: assert postgresql user is not present 
+  assert: { that: "'{{ user_name }}' not in result.stdout" }

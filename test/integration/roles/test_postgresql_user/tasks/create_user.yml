@@ -25,6 +25,8 @@
   sudo_user: postgres
   register: result
 
+- debug: var=result
+
 - name: assert output message postgresql user was created {{state}}
   assert: { that: "result.changed == true" }
 
